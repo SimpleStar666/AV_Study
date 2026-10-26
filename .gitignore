@@ -1,0 +1,11 @@
+# 日志与临时文件
+*.log
+nohup.out
+
+# 系统
+.DS_Store
+Thumbs.db
+
+# 本地抓拍（隐私）
+*cap*.jpg
+mycap.jpg
