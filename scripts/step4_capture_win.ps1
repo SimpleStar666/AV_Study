@@ -1,4 +1,4 @@
-# 第4步：Windows 侧抓包分析（RTSP 信令 + RTP 数据面）v2
+﻿# 第4步：Windows 侧抓包分析（RTSP 信令 + RTP 数据面）v2
 # 用法：
 #   ① 先运行本脚本（抓包立即开始）
 #   ② 去 WSL 终端 2 运行：bash ~/step4_push.sh
