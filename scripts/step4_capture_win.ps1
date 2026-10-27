@@ -58,6 +58,21 @@ Write-Output '==== [C] 首个 RTP 包原始字节（IP头20 + UDP头8 + RTP头12
 & $tshark -r $cap -d 'udp.port==8000,rtp' -Y 'rtp' -x 2>$null | Select-Object -First 13
 
 Write-Output ''
+Write-Output '==== [B2] 双轨统计（第5步音画同步）===='
+$pts = @(& $tshark -r $cap -d 'udp.port==8000,rtp' -Y 'rtp' -T fields -e rtp.p_type 2>$null)
+if ($pts.Count -gt 0) {
+    $grp = $pts | Group-Object | Sort-Object Count -Descending
+    Write-Output "按 PT 分组（96=H.264视频 0=PCMU音频 其他=动态类型）: $($grp | ForEach-Object { "$($_.Name)x$($_.Count)" })"
+    Write-Output ''
+    Write-Output '--- 音频 RTP 前 4 包（PT/seq/timestamp，8000Hz 时钟，每包增量=采样数）---'
+    & $tshark -r $cap -d 'udp.port==8000,rtp' -Y 'rtp.p_type == 0' -T fields -e frame.number -e frame.len -e rtp.seq -e rtp.timestamp 2>$null | Select-Object -First 4
+    Write-Output '--- 视频 RTP 前 4 包（同帧多包 ts 相同 = 分片）---'
+    & $tshark -r $cap -d 'udp.port==8000,rtp' -Y 'rtp.p_type == 96' -T fields -e frame.number -e frame.len -e rtp.seq -e rtp.timestamp 2>$null | Select-Object -First 4
+} else {
+    Write-Output 'RTP 包数=0（检查推流是否真的在跑）'
+}
+
+Write-Output ''
 Write-Output '==== [D] 统计 ===='
 $pkts = @(& $tshark -r $cap -d 'udp.port==8000,rtp' -Y 'rtp' -T fields -e frame.len 2>$null)
 $n = $pkts.Count
